@@ -10,14 +10,15 @@ async def connect() -> None:
     if _pool is not None:
         return
     settings = get_settings()
-    _pool = await asyncpg.create_pool(
+    pool = await asyncpg.create_pool(
         dsn=settings.database_url,
         min_size=1,
         max_size=10,
         command_timeout=30,
     )
-    async with _pool.acquire() as connection:
-        await connection.execute(
+    try:
+        async with pool.acquire() as connection:
+            await connection.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
                 telegram_id BIGINT PRIMARY KEY,
@@ -59,7 +60,11 @@ async def connect() -> None:
             CREATE INDEX IF NOT EXISTS idx_users_created
                 ON users (created_at DESC);
             """
-        )
+            )
+    except Exception:
+        await pool.close()
+        raise
+    _pool = pool
 
 
 async def close() -> None:
