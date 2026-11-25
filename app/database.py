@@ -94,8 +94,8 @@ async def save_user(
         username,
         first_name,
     )
-    if row["is_blocked"]:
-        return "blocked"
+    # Blocking is checked separately by handlers; always preserve the user's
+    # selected language for localized restriction messages.
     return row["language"]
 
 
