@@ -23,7 +23,13 @@ def _safe_result_url(value: str | None) -> str | None:
         return None
     try:
         parsed = urlsplit(value)
-        if parsed.scheme == "https" and parsed.hostname in ALLOWED_RESULT_HOSTS:
+        if (
+            parsed.scheme == "https"
+            and parsed.hostname in ALLOWED_RESULT_HOSTS
+            and not parsed.username
+            and not parsed.password
+            and parsed.port in (None, 443)
+        ):
             return value
     except ValueError:
         pass
