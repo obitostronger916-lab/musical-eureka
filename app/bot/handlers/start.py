@@ -2,6 +2,7 @@ from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from io import BytesIO
 
 from app.bot.keyboards.main import language_keyboard, main_keyboard
 from app.bot.states import MusicSearch
@@ -19,6 +20,7 @@ from app.database import (
     set_user_language,
 )
 from app.i18n import get_text
+from app.services.audio_recognition import recognize_audio
 from app.services.media_links import identify_media_link
 from app.services.music_search import search_tracks
 
@@ -199,6 +201,88 @@ async def music_query_handler(message: Message, state: FSMContext) -> None:
     await status.edit_text(
         "\n\n".join(lines),
         reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons),
+        disable_web_page_preview=True,
+    )
+
+
+@router.message(F.voice | F.audio | F.video | F.video_note)
+async def audio_recognition_handler(message: Message) -> None:
+    if message.from_user is None:
+        return
+    language = await register_activity(message)
+    if await is_user_blocked(message.from_user.id):
+        await message.answer(get_text(language, "blocked"))
+        return
+    if not await allow_request(message.from_user.id, cooldown_seconds=3):
+        await message.answer(get_text(language, "rate_limit"))
+        return
+
+    media = message.voice or message.audio or message.video or message.video_note
+    if media is None:
+        return
+    settings = get_settings()
+    if not settings.audd_api_token:
+        await message.answer(get_text(language, "audio_unavailable"))
+        return
+    if media.file_size and media.file_size > settings.max_media_file_mb * 1024 * 1024:
+        await message.answer(
+            f"Fayl hajmi {settings.max_media_file_mb} MB dan oshmasligi kerak."
+        )
+        return
+    duration = getattr(media, "duration", 0) or 0
+    if duration > 180:
+        await message.answer("Audio yoki video 3 daqiqadan uzun bo‘lmasin.")
+        return
+
+    status = await message.answer(get_text(language, "audio_searching"))
+    try:
+        telegram_file = await message.bot.get_file(media.file_id)
+        if not telegram_file.file_path:
+            raise ValueError("Telegram file path is missing")
+        buffer = BytesIO()
+        await message.bot.download_file(telegram_file.file_path, destination=buffer)
+        raw = buffer.getvalue()
+        if len(raw) > settings.max_media_file_mb * 1024 * 1024:
+            raise ValueError("Media file exceeds configured limit")
+        filename = getattr(media, "file_name", None) or (
+            "video.mp4" if message.video or message.video_note else "audio.bin"
+        )
+        result = await recognize_audio(
+            raw,
+            filename=filename,
+            is_video=bool(message.video or message.video_note),
+        )
+    except Exception as exc:
+        await log_request(
+            message.from_user.id, message.chat.id, "audio_recognition",
+            "error", type(exc).__name__,
+        )
+        await status.edit_text(get_text(language, "audio_error"))
+        return
+
+    await log_request(message.from_user.id, message.chat.id, "audio_recognition")
+    if not result:
+        await status.edit_text(get_text(language, "audio_not_found"))
+        return
+
+    album = result.get("album") or "—"
+    buttons = []
+    for link in result.get("links", []):
+        buttons.append([
+            InlineKeyboardButton(
+                text="Apple Music / Spotify / YouTube",
+                url=link,
+            )
+        ])
+    await status.edit_text(
+        get_text(
+            language,
+            "audio_result",
+            title=result["title"],
+            artist=result["artist"],
+            album=album,
+        ),
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None,
         disable_web_page_preview=True,
     )
 
