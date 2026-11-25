@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     app_name: str = "Universal Media"
     log_level: str = "INFO"
     audd_api_token: str | None = None
-    max_media_file_mb: int = Field(default=15, ge=1, le=25)
+    max_media_file_mb: int = Field(default=15, ge=1, le=20)
 
     model_config = SettingsConfigDict(
         env_file=".env",
