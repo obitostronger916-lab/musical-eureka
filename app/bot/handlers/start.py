@@ -155,7 +155,7 @@ async def section_handler(callback: CallbackQuery, state: FSMContext) -> None:
     await callback.answer()
 
 
-@router.message(MusicSearch.waiting_for_query, F.text)
+@router.message(MusicSearch.waiting_for_query, F.text & ~F.text.startswith("/"))
 async def music_query_handler(message: Message, state: FSMContext) -> None:
     if message.from_user is None or message.text is None:
         return
