@@ -7,11 +7,13 @@ _pool: asyncpg.Pool | None = None
 
 async def connect() -> None:
     global _pool
+    if _pool is not None:
+        return
     settings = get_settings()
     _pool = await asyncpg.create_pool(
         dsn=settings.database_url,
         min_size=1,
-        max_size=5,
+        max_size=10,
         command_timeout=30,
     )
     async with _pool.acquire() as connection:
@@ -25,8 +27,34 @@ async def connect() -> None:
                     CHECK (language IN ('uz', 'ru', 'en')),
                 is_blocked BOOLEAN NOT NULL DEFAULT FALSE,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            )
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                last_request_at TIMESTAMPTZ
+            );
+
+            CREATE TABLE IF NOT EXISTS chats (
+                chat_id BIGINT PRIMARY KEY,
+                chat_type TEXT NOT NULL,
+                title TEXT,
+                username TEXT,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            CREATE TABLE IF NOT EXISTS request_logs (
+                id BIGSERIAL PRIMARY KEY,
+                telegram_id BIGINT,
+                chat_id BIGINT,
+                request_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'ok',
+                detail TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_request_logs_created
+                ON request_logs (created_at DESC);
+            CREATE INDEX IF NOT EXISTS idx_users_created
+                ON users (created_at DESC);
             """
         )
 
@@ -49,8 +77,7 @@ async def save_user(
     username: str | None,
     first_name: str,
 ) -> str:
-    pool = get_pool()
-    row = await pool.fetchrow(
+    row = await get_pool().fetchrow(
         """
         INSERT INTO users (telegram_id, username, first_name)
         VALUES ($1, $2, $3)
@@ -58,12 +85,14 @@ async def save_user(
             username = EXCLUDED.username,
             first_name = EXCLUDED.first_name,
             updated_at = NOW()
-        RETURNING language
+        RETURNING language, is_blocked
         """,
         telegram_id,
         username,
         first_name,
     )
+    if row["is_blocked"]:
+        return "blocked"
     return row["language"]
 
 
@@ -79,3 +108,90 @@ async def set_user_language(telegram_id: int, language: str) -> None:
         telegram_id,
         language,
     )
+
+
+async def get_user_language(telegram_id: int) -> str:
+    value = await get_pool().fetchval(
+        "SELECT language FROM users WHERE telegram_id = $1",
+        telegram_id,
+    )
+    return value or "uz"
+
+
+async def is_user_blocked(telegram_id: int) -> bool:
+    value = await get_pool().fetchval(
+        "SELECT is_blocked FROM users WHERE telegram_id = $1",
+        telegram_id,
+    )
+    return bool(value)
+
+
+async def save_chat(chat_id: int, chat_type: str, title: str | None, username: str | None) -> None:
+    await get_pool().execute(
+        """
+        INSERT INTO chats (chat_id, chat_type, title, username)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (chat_id) DO UPDATE SET
+            chat_type = EXCLUDED.chat_type,
+            title = EXCLUDED.title,
+            username = EXCLUDED.username,
+            is_active = TRUE,
+            last_seen_at = NOW()
+        """,
+        chat_id, chat_type, title, username,
+    )
+
+
+async def log_request(
+    telegram_id: int | None,
+    chat_id: int | None,
+    request_type: str,
+    status: str = "ok",
+    detail: str | None = None,
+) -> None:
+    await get_pool().execute(
+        """
+        INSERT INTO request_logs (telegram_id, chat_id, request_type, status, detail)
+        VALUES ($1, $2, $3, $4, $5)
+        """,
+        telegram_id, chat_id, request_type, status, (detail or "")[:500] or None,
+    )
+
+
+async def allow_request(telegram_id: int, cooldown_seconds: int = 2) -> bool:
+    row = await get_pool().fetchrow(
+        """
+        UPDATE users
+        SET last_request_at = NOW()
+        WHERE telegram_id = $1
+          AND (
+            last_request_at IS NULL OR
+            last_request_at < NOW() - ($2 * INTERVAL '1 second')
+          )
+        RETURNING telegram_id
+        """,
+        telegram_id, cooldown_seconds,
+    )
+    return row is not None
+
+
+async def admin_stats() -> dict[str, int]:
+    pool = get_pool()
+    users, groups, requests, errors = await pool.fetchrow(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM users) AS users,
+            (SELECT COUNT(*) FROM chats WHERE chat_type IN ('group', 'supergroup')) AS groups,
+            (SELECT COUNT(*) FROM request_logs) AS requests,
+            (SELECT COUNT(*) FROM request_logs WHERE status = 'error') AS errors
+        """
+    )
+    return dict(users=users, groups=groups, requests=requests, errors=errors)
+
+
+async def set_user_blocked(telegram_id: int, blocked: bool) -> bool:
+    result = await get_pool().execute(
+        "UPDATE users SET is_blocked = $2, updated_at = NOW() WHERE telegram_id = $1",
+        telegram_id, blocked,
+    )
+    return result.endswith("1")
