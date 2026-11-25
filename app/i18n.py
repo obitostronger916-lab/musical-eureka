@@ -6,14 +6,19 @@ TEXTS = {
         "music": "Musiqa qidirish",
         "language": "Tilni tanlash",
         "language_saved": "Til o‘zgartirildi.",
-        "media_help": "Ommaviy va siz foydalanishga ruxsat olgan media havolasini yuboring. Hozircha havola tekshiruvi bosqichi ishlab chiqilmoqda.",
-        "music_help": "Qo‘shiq nomi yoki ijrochi nomini yuboring. Qidirish uchun matn yuboring (masalan, qo‘shiq nomi yoki ijrochi).",
+        "media_help": "Instagram, YouTube, TikTok yoki Pinterest havolasini yuboring. Bot havola manbasini aniqlaydi va rasmiy sahifaga yo‘naltiradi. Himoyalangan kontentni yuklab olmaydi.",
+        "music_help": "Qo‘shiq nomi yoki ijrochi nomini yuboring.",
         "music_searching": "Musiqa qidirilmoqda...",
         "music_empty": "Mos qo‘shiqlar topilmadi. Boshqa nom bilan urinib ko‘ring.",
         "music_error": "Musiqa katalogiga ulanib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.",
         "music_too_long": "Qidiruv matni 100 belgidan oshmasin.",
+        "media_found": "Havola manbasi: {platform}\nRasmiy havola: {url}",
+        "media_invalid": "Qo‘llab-quvvatlanadigan ommaviy havola topilmadi. To‘liq HTTPS havolani yuboring.",
+        "rate_limit": "Juda tez yuboryapsiz. Biroz kutib qayta urinib ko‘ring.",
+        "blocked": "Botdan foydalanish imkoniyati cheklangan. Administratorga murojaat qiling.",
         "admin_only": "Bu buyruq faqat administrator uchun.",
         "unknown": "Bu bo‘lim hali ishlab chiqilmoqda.",
+        "help": "Buyruqlar: /start — boshlash, /language — til, /music — musiqa qidirish, /help — yordam.",
     },
     "ru": {
         "welcome": "Здравствуйте! Добро пожаловать в Universal Media.",
@@ -22,14 +27,19 @@ TEXTS = {
         "music": "Поиск музыки",
         "language": "Выбрать язык",
         "language_saved": "Язык изменён.",
-        "media_help": "Отправьте публичную ссылку на контент, которым вы имеете право пользоваться. Проверка ссылок пока находится в разработке.",
+        "media_help": "Отправьте ссылку Instagram, YouTube, TikTok или Pinterest. Бот определит источник и покажет официальную ссылку. Защищённый контент не скачивается.",
         "music_help": "Отправьте название песни или имя исполнителя для поиска.",
         "music_searching": "Ищем музыку...",
         "music_empty": "Подходящие песни не найдены. Попробуйте другой запрос.",
         "music_error": "Не удалось подключиться к музыкальному каталогу. Попробуйте позже.",
         "music_too_long": "Поисковый запрос не должен превышать 100 символов.",
+        "media_found": "Источник ссылки: {platform}\nОфициальная ссылка: {url}",
+        "media_invalid": "Поддерживаемая публичная ссылка не найдена. Отправьте полный HTTPS-адрес.",
+        "rate_limit": "Слишком часто. Немного подождите и попробуйте снова.",
+        "blocked": "Доступ к боту ограничен. Свяжитесь с администратором.",
         "admin_only": "Эта команда доступна только администратору.",
         "unknown": "Этот раздел пока находится в разработке.",
+        "help": "Команды: /start — начать, /language — язык, /music — поиск музыки, /help — помощь.",
     },
     "en": {
         "welcome": "Hello! Welcome to Universal Media.",
@@ -38,18 +48,27 @@ TEXTS = {
         "music": "Music search",
         "language": "Choose language",
         "language_saved": "Language updated.",
-        "media_help": "Send a public link to content you are authorized to use. Link processing is currently under development.",
+        "media_help": "Send an Instagram, YouTube, TikTok, or Pinterest link. The bot identifies the source and points to the official page. Protected content is not downloaded.",
         "music_help": "Send a song title or artist name to search.",
         "music_searching": "Searching the music catalog...",
         "music_empty": "No matching tracks found. Try another search.",
         "music_error": "Could not connect to the music catalog. Please try again later.",
         "music_too_long": "Search text must be 100 characters or fewer.",
+        "media_found": "Link source: {platform}\nOfficial link: {url}",
+        "media_invalid": "No supported public link found. Send a full HTTPS URL.",
+        "rate_limit": "You're sending requests too quickly. Please wait a moment.",
+        "blocked": "Your bot access is restricted. Please contact the administrator.",
         "admin_only": "This command is for the administrator only.",
         "unknown": "This section is still under development.",
+        "help": "Commands: /start — start, /language — language, /music — search music, /help — help.",
     },
 }
 
 
-def get_text(language: str, key: str) -> str:
+def get_text(language: str, key: str, **values: str) -> str:
     selected = language if language in TEXTS else "uz"
-    return TEXTS[selected].get(key, TEXTS["uz"].get(key, key))
+    template = TEXTS[selected].get(key, TEXTS["uz"].get(key, key))
+    try:
+        return template.format(**values)
+    except (KeyError, ValueError):
+        return template
