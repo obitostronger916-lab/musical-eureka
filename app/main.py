@@ -17,11 +17,10 @@ logger = logging.getLogger("universal_media")
 async def lifespan(app: FastAPI):
     settings = get_settings()
     logging.basicConfig(level=settings.log_level.upper())
-    await connect()
-
     bot: Bot | None = None
     polling_task: asyncio.Task | None = None
     try:
+        await connect()
         bot = Bot(token=settings.bot_token)
         dispatcher = Dispatcher()
         dispatcher.include_router(router)
