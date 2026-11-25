@@ -8,9 +8,10 @@ Universal Media — Telegram uchun o‘zbek, rus va ingliz tillarida ishlaydigan
 - O‘zbek, rus va ingliz tillarida interfeys;
 - foydalanuvchi tili va faolligini PostgreSQL'da saqlash;
 - shaxsiy chat va guruh chatlarini qayd etish;
-- `/start`, `/help`, `/language`, `/music`, `/cancel` buyruqlari;
+- `/start`, `/help`, `/language`, `/music`, `/lyrics`, `/cancel` buyruqlari;
 - Instagram, YouTube, TikTok va Pinterest HTTPS havolalarini xavfsiz host allowlist orqali aniqlash;
 - Apple iTunes katalogidan qo‘shiq nomi yoki ijrochi bo‘yicha qidirish;
+- ixtiyoriy Musixmatch API orqali qo‘shiq matnidan qisqa parcha bilan qidirish; faqat qo‘shiq metadata va rasmiy havola qaytariladi;
 - ixtiyoriy AudD integratsiyasi orqali audio/voice/video ichidan musiqa tanish;
 - video ichidan audioni ajratish uchun FFmpeg;
 - so‘rovlar tezligini cheklash, foydalanuvchini bloklash va admin statistikasi;
@@ -21,6 +22,7 @@ Universal Media — Telegram uchun o‘zbek, rus va ingliz tillarida ishlaydigan
 
 - Media havolasi funksiyasi hozircha platformani aniqlaydi va foydalanuvchiga rasmiy manbaga qaytish havolasini beradi. Instagram, YouTube, TikTok yoki Pinterest kontentini yuklab olish funksiyasi yo‘q.
 - Musiqa nomi/ijrochi qidiruvi Apple katalogidan metadata va rasmiy tinglash havolasini qaytaradi; audio nusxasini tarqatmaydi.
+- Matn bo‘yicha qidiruv uchun `MUSIXMATCH_API_KEY` kerak. Foydalanuvchi yuborgan qisqa parcha qidiruv uchun Musixmatch API’ga yuboriladi; bot to‘liq qo‘shiq matnini saqlamaydi yoki qayta ko‘rsatmaydi.
 - Ovozli xabar, audio va videodan musiqa aniqlash uchun alohida AudD API tokeni kerak. Tanib olish so‘rovida media fayl AudD xizmatiga yuboriladi; token bo‘lmasa, funksiya ishlamaydi. Foydalanuvchilarga bu haqda oldindan xabar berish kerak.
 - DRM, login, paywall yoki platforma himoyalarini chetlab o‘tish rejalashtirilmagan. Audio tarqatish faqat tegishli litsenziya/ruxsat mavjud bo‘lganda ko‘rib chiqiladi.
 - Hozirgi Render rejimi bitta web service instance va long polling uchun mo‘ljallangan. Bir nechta instance ishga tushirilsa, Telegram polling to‘qnashuvi yuz berishi mumkin.
@@ -48,7 +50,8 @@ Windows PowerShell:
 - `BOT_TOKEN` — BotFather bergan bot tokeni;
 - `ADMIN_ID` — asosiy administratorning raqamli Telegram ID'si;
 - `DATABASE_URL` — PostgreSQL ulanish manzili;
-- `AUDD_API_TOKEN` — ixtiyoriy, audio orqali musiqa aniqlash uchun.
+- `AUDD_API_TOKEN` — ixtiyoriy, audio orqali musiqa aniqlash uchun;
+- `MUSIXMATCH_API_KEY` — ixtiyoriy, qo‘shiq matnidan qidirish uchun.
 
 5. Ishga tushiring:
 
