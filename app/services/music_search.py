@@ -7,10 +7,19 @@ ALLOWED_HOSTS = {"itunes.apple.com", "music.apple.com"}
 
 
 def _safe_store_url(value: str) -> str | None:
-    parsed = urlparse(value)
-    if parsed.scheme != "https" or parsed.hostname not in ALLOWED_HOSTS:
+    try:
+        parsed = urlparse(value)
+        if (
+            parsed.scheme != "https"
+            or parsed.hostname not in ALLOWED_HOSTS
+            or parsed.username
+            or parsed.password
+            or parsed.port not in (None, 443)
+        ):
+            return None
+        return value
+    except ValueError:
         return None
-    return value
 
 
 async def search_tracks(query: str, limit: int = 5) -> list[dict[str, str]]:
@@ -53,10 +62,19 @@ async def search_tracks(query: str, limit: int = 5) -> list[dict[str, str]]:
 
 
 def _safe_musixmatch_url(value: str) -> str | None:
-    parsed = urlparse(value)
-    if parsed.scheme != "https" or parsed.hostname not in {"musixmatch.com", "www.musixmatch.com"}:
+    try:
+        parsed = urlparse(value)
+        if (
+            parsed.scheme != "https"
+            or parsed.hostname not in {"musixmatch.com", "www.musixmatch.com"}
+            or parsed.username
+            or parsed.password
+            or parsed.port not in (None, 443)
+        ):
+            return None
+        return value
+    except ValueError:
         return None
-    return value
 
 
 def _normalize_lyrics_results(payload: dict, limit: int = 5) -> list[dict[str, str]]:
