@@ -203,7 +203,7 @@ async def music_query_handler(message: Message, state: FSMContext) -> None:
     )
 
 
-@router.message(F.text)
+@router.message(F.text & ~F.text.startswith("/"))
 async def media_link_handler(message: Message, state: FSMContext) -> None:
     if message.from_user is None or message.text is None:
         return
