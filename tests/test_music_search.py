@@ -24,10 +24,15 @@ class MusicSearchTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(_safe_store_url("http://itunes.apple.com/track?id=1"))
         self.assertIsNone(_safe_store_url("https://example.com/track"))
         self.assertIsNone(_safe_store_url("https://itunes.apple.com.example.org/"))
+        self.assertIsNone(_safe_store_url("https://user@itunes.apple.com/track?id=1"))
+        self.assertIsNone(_safe_store_url("https://itunes.apple.com:8443/track?id=1"))
+        self.assertIsNone(_safe_store_url("https://itunes.apple.com:invalid/track?id=1"))
 
     def test_musixmatch_result_normalization_and_url_allowlist(self):
         self.assertIsNone(_safe_musixmatch_url("http://www.musixmatch.com/song"))
         self.assertIsNone(_safe_musixmatch_url("https://example.com/song"))
+        self.assertIsNone(_safe_musixmatch_url("https://user@www.musixmatch.com/song"))
+        self.assertIsNone(_safe_musixmatch_url("https://www.musixmatch.com:8443/song"))
         payload = {
             "message": {
                 "header": {"status_code": 200},
