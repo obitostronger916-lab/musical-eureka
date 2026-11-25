@@ -66,12 +66,18 @@ async def start_handler(message: Message, state: FSMContext) -> None:
 @router.message(Command("help"))
 async def help_handler(message: Message) -> None:
     language = await register_activity(message)
+    if message.from_user and await is_user_blocked(message.from_user.id):
+        await message.answer(get_text(language, "blocked"))
+        return
     await message.answer(get_text(language, "help"))
 
 
 @router.message(Command("language"))
 async def language_command(message: Message) -> None:
     language = await register_activity(message)
+    if message.from_user and await is_user_blocked(message.from_user.id):
+        await message.answer(get_text(language, "blocked"))
+        return
     await message.answer(
         "Tilni tanlang / Выберите язык / Choose a language:",
         reply_markup=language_keyboard(),
@@ -110,11 +116,18 @@ async def lyrics_command(message: Message, state: FSMContext) -> None:
 async def cancel_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     language = await register_activity(message)
+    if message.from_user and await is_user_blocked(message.from_user.id):
+        await message.answer(get_text(language, "blocked"))
+        return
     await message.answer(get_text(language, "choose"), reply_markup=main_keyboard(language))
 
 
 @router.callback_query(F.data == "language:menu")
 async def language_menu(callback: CallbackQuery) -> None:
+    if callback.from_user and await is_user_blocked(callback.from_user.id):
+        language = await get_user_language(callback.from_user.id)
+        await callback.answer(get_text(language, "blocked"), show_alert=True)
+        return
     if callback.message:
         await callback.message.answer(
             "Tilni tanlang / Выберите язык / Choose a language:",
@@ -136,6 +149,10 @@ async def language_selected(callback: CallbackQuery) -> None:
         username=callback.from_user.username,
         first_name=callback.from_user.first_name or "",
     )
+    if await is_user_blocked(callback.from_user.id):
+        current_language = await get_user_language(callback.from_user.id)
+        await callback.answer(get_text(current_language, "blocked"), show_alert=True)
+        return
     await set_user_language(callback.from_user.id, language)
     if callback.message:
         await callback.message.answer(
@@ -155,11 +172,11 @@ async def section_handler(callback: CallbackQuery, state: FSMContext) -> None:
         callback.from_user.username,
         callback.from_user.first_name or "",
     )
+    language = await get_user_language(callback.from_user.id)
     if await is_user_blocked(callback.from_user.id):
-        await callback.answer("Access restricted", show_alert=True)
+        await callback.answer(get_text(language, "blocked"), show_alert=True)
         return
     section = callback.data.split(":", 1)[1]
-    language = await get_user_language(callback.from_user.id)
 
     if section == "music":
         await state.set_state(MusicSearch.waiting_for_query)
@@ -363,6 +380,8 @@ async def admin_handler(message: Message) -> None:
         f"Guruhlar: {stats['groups']}\n"
         f"So‘rovlar: {stats['requests']}\n"
         f"Xatolar: {stats['errors']}\n\n"
+        "/users — oxirgi foydalanuvchilar\n"
+        "/requests — oxirgi so‘rovlar\n"
         "/block ID — foydalanuvchini bloklash\n"
         "/unblock ID — blokdan chiqarish"
     )
@@ -374,10 +393,14 @@ async def block_handler(message: Message) -> None:
         await message.answer(get_text("uz", "admin_only"))
         return
     parts = (message.text or "").split()
-    if len(parts) != 2 or not parts[1].isdigit():
-        await message.answer("Foydalanish: /block TELEGRAM_ID")
+    if len(parts) != 2 or not parts[1].isdigit() or len(parts[1]) > 19:
+        await message.answer("Foydalanish: /block TELEGRAM_ID (musbat 64-bit ID)")
         return
-    changed = await set_user_blocked(int(parts[1]), True)
+    telegram_id = int(parts[1])
+    if not 0 < telegram_id <= 9_223_372_036_854_775_807:
+        await message.answer("Telegram ID noto‘g‘ri.")
+        return
+    changed = await set_user_blocked(telegram_id, True)
     await message.answer("Foydalanuvchi bloklandi." if changed else "Foydalanuvchi topilmadi.")
 
 
@@ -387,10 +410,14 @@ async def unblock_handler(message: Message) -> None:
         await message.answer(get_text("uz", "admin_only"))
         return
     parts = (message.text or "").split()
-    if len(parts) != 2 or not parts[1].isdigit():
-        await message.answer("Foydalanish: /unblock TELEGRAM_ID")
+    if len(parts) != 2 or not parts[1].isdigit() or len(parts[1]) > 19:
+        await message.answer("Foydalanish: /unblock TELEGRAM_ID (musbat 64-bit ID)")
         return
-    changed = await set_user_blocked(int(parts[1]), False)
+    telegram_id = int(parts[1])
+    if not 0 < telegram_id <= 9_223_372_036_854_775_807:
+        await message.answer("Telegram ID noto‘g‘ri.")
+        return
+    changed = await set_user_blocked(telegram_id, False)
     await message.answer("Blok olib tashlandi." if changed else "Foydalanuvchi topilmadi.")
 
 
