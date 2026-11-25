@@ -24,7 +24,7 @@ from app.database import (
 from app.i18n import get_text
 from app.services.audio_recognition import recognize_audio
 from app.services.media_links import identify_media_link
-from app.services.music_search import search_tracks
+from app.services.music_search import search_tracks, search_tracks_by_lyrics
 
 router = Router()
 
@@ -85,7 +85,22 @@ async def music_command(message: Message, state: FSMContext) -> None:
         await message.answer(get_text(language, "blocked"))
         return
     await state.set_state(MusicSearch.waiting_for_query)
-    await message.answer(get_text(language, "music_help"))
+    await state.update_data(search_mode="title")
+    await message.answer(get_text(language, "music_help") + "\n/lyrics — qo‘shiq matnidan qidirish")
+
+
+@router.message(Command("lyrics"))
+async def lyrics_command(message: Message, state: FSMContext) -> None:
+    language = await register_activity(message)
+    if message.from_user and await is_user_blocked(message.from_user.id):
+        await message.answer(get_text(language, "blocked"))
+        return
+    if not get_settings().musixmatch_api_key:
+        await message.answer(get_text(language, "lyrics_unavailable"))
+        return
+    await state.set_state(MusicSearch.waiting_for_query)
+    await state.update_data(search_mode="lyrics")
+    await message.answer(get_text(language, "lyrics_help"))
 
 
 @router.message(Command("cancel"))
@@ -176,16 +191,31 @@ async def music_query_handler(message: Message, state: FSMContext) -> None:
         return
 
     await log_request(message.from_user.id, message.chat.id, "music_search")
-    status = await message.answer(get_text(language, "music_searching"))
+    search_mode = (await state.get_data()).get("search_mode", "title")
+    is_lyrics_search = search_mode == "lyrics"
+    settings = get_settings()
+    if is_lyrics_search and not settings.musixmatch_api_key:
+        await message.answer(get_text(language, "lyrics_unavailable"))
+        return
+
+    request_type = "lyrics_search" if is_lyrics_search else "music_search"
+    status_key = "lyrics_searching" if is_lyrics_search else "music_searching"
+    await log_request(message.from_user.id, message.chat.id, request_type)
+    status = await message.answer(get_text(language, status_key))
     try:
-        tracks = await search_tracks(query)
+        if is_lyrics_search:
+            tracks = await search_tracks_by_lyrics(query, settings.musixmatch_api_key)
+        else:
+            tracks = await search_tracks(query)
     except Exception as exc:
-        await log_request(message.from_user.id, message.chat.id, "music_search", "error", type(exc).__name__)
-        await status.edit_text(get_text(language, "music_error"))
+        await log_request(message.from_user.id, message.chat.id, request_type, "error", type(exc).__name__)
+        error_key = "lyrics_error" if is_lyrics_search else "music_error"
+        await status.edit_text(get_text(language, error_key))
         return
 
     if not tracks:
-        await status.edit_text(get_text(language, "music_empty"))
+        empty_key = "lyrics_empty" if is_lyrics_search else "music_empty"
+        await status.edit_text(get_text(language, empty_key))
         return
 
     lines = []
