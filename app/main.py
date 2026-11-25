@@ -49,10 +49,12 @@ async def lifespan(app: FastAPI):
                 pass
             except Exception:
                 logger.exception("Telegram polling task stopped with an error")
-        if bot is not None:
-            await bot.session.close()
-        await close()
-        logger.info("Universal Media stopped")
+        try:
+            if bot is not None:
+                await bot.session.close()
+        finally:
+            await close()
+            logger.info("Universal Media stopped")
 
 
 app = FastAPI(title="Universal Media API", lifespan=lifespan)
