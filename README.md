@@ -74,7 +74,7 @@ Bot guruhdagi oddiy xabarlar va havolalarni ko‘rishi uchun BotFather’da `/se
 
 ## Render
 
-Render'da Blueprint orqali `render.yaml` ni tanlang. Hozirgi Blueprint web service uchun plan ko‘rsatilmagan: yangi Render web service uchun standart plan pullik `0.5c-512mb`; PostgreSQL esa `basic-256mb` planida yaratiladi. Bu loyiha foydalanuvchilar uchun bepul va reklamasiz bo‘lishi mumkin, ammo hostingning o‘zi bepul emas. Render narxlari o‘zgarishi mumkin; deploydan oldin Dashboard'da yakuniy narxni tekshiring. Free web service 15 daqiqa kiruvchi trafik bo‘lmasa uxlaydi, Free PostgreSQL esa 30 kundan keyin tugaydi, shuning uchun 24/7 bot uchun free rejim mos emas.
+Render'da Blueprint orqali `render.yaml` ni tanlang. Blueprint web service uchun `0.5c-512mb`, PostgreSQL uchun `0.1c-256mb` planlarini va ikkisi uchun Singapore regionini belgilaydi. Joriy Render tariflarida bu taxminan web service uchun $7/oy va PostgreSQL uchun $6/oy (jami taxminan $13/oy); yakuniy narxni deploydan oldin Render Dashboard'da tekshiring. Free web service 15 daqiqa kiruvchi trafik bo‘lmasa uxlaydi, Free PostgreSQL esa 30 kundan keyin tugaydi, shuning uchun 24/7 bot uchun free rejim mos emas.
 
 Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni; matn bo‘yicha qidirish kerak bo‘lsa, `MUSIXMATCH_API_KEY` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
 
