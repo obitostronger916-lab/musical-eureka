@@ -265,12 +265,12 @@ async def audio_recognition_handler(message: Message) -> None:
         return
     if media.file_size and media.file_size > settings.max_media_file_mb * 1024 * 1024:
         await message.answer(
-            f"Fayl hajmi {settings.max_media_file_mb} MB dan oshmasligi kerak."
+            get_text(language, "audio_file_too_large", limit=str(settings.max_media_file_mb))
         )
         return
     duration = getattr(media, "duration", 0) or 0
     if duration > 180:
-        await message.answer("Audio yoki video 3 daqiqadan uzun bo‘lmasin.")
+        await message.answer(get_text(language, "audio_too_long"))
         return
 
     status = await message.answer(get_text(language, "audio_searching"))
@@ -309,7 +309,7 @@ async def audio_recognition_handler(message: Message) -> None:
     for link in result.get("links", []):
         buttons.append([
             InlineKeyboardButton(
-                text="Apple Music / Spotify / YouTube",
+                text=get_text(language, "audio_open_track"),
                 url=link,
             )
         ])
