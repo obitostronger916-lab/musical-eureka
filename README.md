@@ -21,7 +21,7 @@ Universal Media — Telegram uchun o‘zbek, rus va ingliz tillarida ishlaydigan
 
 - Media havolasi funksiyasi hozircha platformani aniqlaydi va foydalanuvchiga rasmiy manbaga qaytish havolasini beradi. Instagram, YouTube, TikTok yoki Pinterest kontentini yuklab olish funksiyasi yo‘q.
 - Musiqa nomi/ijrochi qidiruvi Apple katalogidan metadata va rasmiy tinglash havolasini qaytaradi; audio nusxasini tarqatmaydi.
-- Ovozli xabar, audio va videodan musiqa aniqlash uchun alohida AudD API tokeni kerak. Token bo‘lmasa, bu funksiya foydalanuvchiga sozlanmaganini bildiradi.
+- Ovozli xabar, audio va videodan musiqa aniqlash uchun alohida AudD API tokeni kerak. Tanib olish so‘rovida media fayl AudD xizmatiga yuboriladi; token bo‘lmasa, funksiya ishlamaydi. Foydalanuvchilarga bu haqda oldindan xabar berish kerak.
 - DRM, login, paywall yoki platforma himoyalarini chetlab o‘tish rejalashtirilmagan. Audio tarqatish faqat tegishli litsenziya/ruxsat mavjud bo‘lganda ko‘rib chiqiladi.
 - Hozirgi Render rejimi bitta web service instance va long polling uchun mo‘ljallangan. Bir nechta instance ishga tushirilsa, Telegram polling to‘qnashuvi yuz berishi mumkin.
 
