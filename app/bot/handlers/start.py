@@ -160,7 +160,8 @@ async def section_handler(callback: CallbackQuery, state: FSMContext) -> None:
 
     if section == "music":
         await state.set_state(MusicSearch.waiting_for_query)
-        response = get_text(language, "music_help")
+        await state.update_data(search_mode="title")
+        response = get_text(language, "music_help") + "\n/lyrics — search by lyric excerpt"
     elif section == "media":
         await state.clear()
         response = get_text(language, "media_help")
@@ -190,7 +191,6 @@ async def music_query_handler(message: Message, state: FSMContext) -> None:
         await message.answer(get_text(language, "music_too_long"))
         return
 
-    await log_request(message.from_user.id, message.chat.id, "music_search")
     search_mode = (await state.get_data()).get("search_mode", "title")
     is_lyrics_search = search_mode == "lyrics"
     settings = get_settings()
