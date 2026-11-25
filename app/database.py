@@ -19,23 +19,23 @@ async def connect() -> None:
     try:
         async with pool.acquire() as connection:
             await connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS users (
+                """
+                CREATE TABLE IF NOT EXISTS users (
                 telegram_id BIGINT PRIMARY KEY,
                 username TEXT,
                 first_name TEXT NOT NULL DEFAULT '',
                 language TEXT NOT NULL DEFAULT 'uz'
-                    CHECK (language IN ('uz', 'ru', 'en')),
+                CHECK (language IN ('uz', 'ru', 'en')),
                 is_blocked BOOLEAN NOT NULL DEFAULT FALSE,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 last_request_at TIMESTAMPTZ
-            );
-
-            ALTER TABLE users
+                );
+                
+                ALTER TABLE users
                 ADD COLUMN IF NOT EXISTS last_request_at TIMESTAMPTZ;
-
-            CREATE TABLE IF NOT EXISTS chats (
+                
+                CREATE TABLE IF NOT EXISTS chats (
                 chat_id BIGINT PRIMARY KEY,
                 chat_type TEXT NOT NULL,
                 title TEXT,
@@ -43,9 +43,9 @@ async def connect() -> None:
                 is_active BOOLEAN NOT NULL DEFAULT TRUE,
                 first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-
-            CREATE TABLE IF NOT EXISTS request_logs (
+                );
+                
+                CREATE TABLE IF NOT EXISTS request_logs (
                 id BIGSERIAL PRIMARY KEY,
                 telegram_id BIGINT,
                 chat_id BIGINT,
@@ -53,13 +53,13 @@ async def connect() -> None:
                 status TEXT NOT NULL DEFAULT 'ok',
                 detail TEXT,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_request_logs_created
+                );
+                
+                CREATE INDEX IF NOT EXISTS idx_request_logs_created
                 ON request_logs (created_at DESC);
-            CREATE INDEX IF NOT EXISTS idx_users_created
+                CREATE INDEX IF NOT EXISTS idx_users_created
                 ON users (created_at DESC);
-            """
+                """
             )
     except Exception:
         await pool.close()
