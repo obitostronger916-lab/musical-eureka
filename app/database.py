@@ -198,3 +198,29 @@ async def set_user_blocked(telegram_id: int, blocked: bool) -> bool:
         telegram_id, blocked,
     )
     return result.endswith("1")
+
+
+async def latest_users(limit: int = 10) -> list[asyncpg.Record]:
+    safe_limit = max(1, min(limit, 20))
+    return await get_pool().fetch(
+        """
+        SELECT telegram_id, username, first_name, language, is_blocked, created_at
+        FROM users
+        ORDER BY created_at DESC
+        LIMIT $1
+        """,
+        safe_limit,
+    )
+
+
+async def latest_requests(limit: int = 10) -> list[asyncpg.Record]:
+    safe_limit = max(1, min(limit, 20))
+    return await get_pool().fetch(
+        """
+        SELECT telegram_id, chat_id, request_type, status, detail, created_at
+        FROM request_logs
+        ORDER BY created_at DESC
+        LIMIT $1
+        """,
+        safe_limit,
+    )
