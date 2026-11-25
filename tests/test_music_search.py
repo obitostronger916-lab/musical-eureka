@@ -1,6 +1,12 @@
 import unittest
 
-from app.services.music_search import (\n    _normalize_lyrics_results, _safe_musixmatch_url, _safe_store_url,\n    search_tracks, search_tracks_by_lyrics,\n)
+from app.services.music_search import (
+    _normalize_lyrics_results,
+    _safe_musixmatch_url,
+    _safe_store_url,
+    search_tracks,
+    search_tracks_by_lyrics,
+)
 
 
 class MusicSearchTests(unittest.IsolatedAsyncioTestCase):
@@ -22,11 +28,23 @@ class MusicSearchTests(unittest.IsolatedAsyncioTestCase):
     def test_musixmatch_result_normalization_and_url_allowlist(self):
         self.assertIsNone(_safe_musixmatch_url("http://www.musixmatch.com/song"))
         self.assertIsNone(_safe_musixmatch_url("https://example.com/song"))
-        payload = {"message": {"header": {"status_code": 200}, "body": {"track_list": [
-            {"track": {"track_name": "Example", "artist_name": "Artist",
-                       "album_name": "Album",
-                       "track_share_url": "https://www.musixmatch.com/lyrics/example"}}
-        ]}}}
+        payload = {
+            "message": {
+                "header": {"status_code": 200},
+                "body": {
+                    "track_list": [
+                        {
+                            "track": {
+                                "track_name": "Example",
+                                "artist_name": "Artist",
+                                "album_name": "Album",
+                                "track_share_url": "https://www.musixmatch.com/lyrics/example",
+                            }
+                        }
+                    ]
+                },
+            }
+        }
         results = _normalize_lyrics_results(payload)
         self.assertEqual(results[0]["title"], "Example")
         self.assertEqual(results[0]["artist"], "Artist")
