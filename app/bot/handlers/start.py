@@ -13,6 +13,8 @@ from app.database import (
     get_pool,
     get_user_language,
     is_user_blocked,
+    latest_requests,
+    latest_users,
     log_request,
     save_chat,
     save_user,
@@ -353,3 +355,42 @@ async def unblock_handler(message: Message) -> None:
         return
     changed = await set_user_blocked(int(parts[1]), False)
     await message.answer("Blok olib tashlandi." if changed else "Foydalanuvchi topilmadi.")
+
+
+
+@router.message(Command("users"))
+async def users_handler(message: Message) -> None:
+    if not _is_admin(message):
+        await message.answer(get_text("uz", "admin_only"))
+        return
+    rows = await latest_users(15)
+    if not rows:
+        await message.answer("Foydalanuvchilar hali yo‘q.")
+        return
+    lines = ["Oxirgi foydalanuvchilar:"]
+    for row in rows:
+        name = row["first_name"] or "—"
+        username = f" (@{row['username']})" if row["username"] else ""
+        status = " [BLOCK]" if row["is_blocked"] else ""
+        lines.append(f"{row['telegram_id']} — {name}{username} — {row['language']}{status}")
+    await message.answer("\n".join(lines))
+
+
+@router.message(Command("requests"))
+async def requests_handler(message: Message) -> None:
+    if not _is_admin(message):
+        await message.answer(get_text("uz", "admin_only"))
+        return
+    rows = await latest_requests(15)
+    if not rows:
+        await message.answer("So‘rovlar hali yo‘q.")
+        return
+    lines = ["Oxirgi so‘rovlar:"]
+    for row in rows:
+        created = row["created_at"].strftime("%d.%m %H:%M")
+        detail = f" — {row['detail']}" if row["detail"] else ""
+        lines.append(
+            f"{created} | {row['request_type']} | {row['status']} | "
+            f"user={row['telegram_id']}{detail}"
+        )
+    await message.answer("\n".join(lines))
