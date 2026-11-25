@@ -14,6 +14,8 @@ class AudioRecognitionSafetyTests(unittest.TestCase):
         self.assertIsNone(_safe_result_url("http://music.apple.com/song"))
         self.assertIsNone(_safe_result_url("https://evil.example/song"))
         self.assertIsNone(_safe_result_url("https://music.apple.com.evil.example/"))
+        self.assertIsNone(_safe_result_url("https://user@music.apple.com/song"))
+        self.assertIsNone(_safe_result_url("https://music.apple.com:8443/song"))
 
 
 if __name__ == "__main__":
