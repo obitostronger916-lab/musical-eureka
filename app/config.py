@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +10,8 @@ class Settings(BaseSettings):
     database_url: str
     app_name: str = "Universal Media"
     log_level: str = "INFO"
+    audd_api_token: str | None = None
+    max_media_file_mb: int = Field(default=15, ge=1, le=25)
 
     model_config = SettingsConfigDict(
         env_file=".env",
