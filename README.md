@@ -18,6 +18,13 @@ Universal Media — Telegram uchun o‘zbek, rus va ingliz tillarida ishlaydigan
 - admin buyruqlari: `/admin`, `/users`, `/requests`, `/block ID`, `/unblock ID`;
 - GitHub Actions orqali Python compile va unit testlar.
 
+## Maxfiylik va saqlanadigan ma’lumotlar
+
+- Bot ishlashi uchun foydalanuvchining Telegram ID, ism, username va tanlangan tili; chat ID va guruh nomi; so‘rov turi, holati va vaqti PostgreSQL’da saqlanadi.
+- Bot qidiruv so‘rovlarining matnini va yuborilgan media fayllarni o‘z bazasida saqlamaydi.
+- Audio tanish uchun audio AudD’ga, qo‘shiq matnidan qidirish uchun yuborilgan qisqa parcha Musixmatch’ga uzatiladi. Qo‘shiq nomi/ijrochi qidiruvi Apple katalogiga yuboriladi.
+- Hozir foydalanuvchi ma’lumotlarini bot ichidan o‘chirish buyrug‘i yo‘q. Ommaviy ishga tushirishdan oldin ma’lumotlarni saqlash muddati, o‘chirish tartibi va maxfiylik siyosatini belgilash kerak.
+
 ## Muhim cheklovlar
 
 - Media havolasi funksiyasi hozircha platformani aniqlaydi va foydalanuvchiga rasmiy manbaga qaytish havolasini beradi. Instagram, YouTube, TikTok yoki Pinterest kontentini yuklab olish funksiyasi yo‘q.
@@ -67,7 +74,9 @@ Bot guruhdagi oddiy xabarlar va havolalarni ko‘rishi uchun BotFather’da `/se
 
 ## Render
 
-Render'da Blueprint orqali `render.yaml` ni tanlang. Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni; matn bo‘yicha qidirish kerak bo‘lsa, `MUSIXMATCH_API_KEY` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
+Render'da Blueprint orqali `render.yaml` ni tanlang. Hozirgi Blueprint web service uchun plan ko‘rsatilmagan: yangi Render web service uchun standart plan pullik `0.5c-512mb`; PostgreSQL esa `basic-256mb` planida yaratiladi. Bu loyiha foydalanuvchilar uchun bepul va reklamasiz bo‘lishi mumkin, ammo hostingning o‘zi bepul emas. Render narxlari o‘zgarishi mumkin; deploydan oldin Dashboard'da yakuniy narxni tekshiring. Free web service 15 daqiqa kiruvchi trafik bo‘lmasa uxlaydi, Free PostgreSQL esa 30 kundan keyin tugaydi, shuning uchun 24/7 bot uchun free rejim mos emas.
+
+Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni; matn bo‘yicha qidirish kerak bo‘lsa, `MUSIXMATCH_API_KEY` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
 
 Render service uchun bitta instance ishlating. `/health` endpoint'i PostgreSQL va Telegram polling holatini tekshiradi.
 
