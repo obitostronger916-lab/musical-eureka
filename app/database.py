@@ -180,16 +180,21 @@ async def allow_request(telegram_id: int, cooldown_seconds: int = 2) -> bool:
 
 async def admin_stats() -> dict[str, int]:
     pool = get_pool()
-    users, groups, requests, errors = await pool.fetchrow(
+    row = await pool.fetchrow(
         """
         SELECT
-            (SELECT COUNT(*) FROM users) AS users,
-            (SELECT COUNT(*) FROM chats WHERE chat_type IN ('group', 'supergroup')) AS groups,
-            (SELECT COUNT(*) FROM request_logs) AS requests,
-            (SELECT COUNT(*) FROM request_logs WHERE status = 'error') AS errors
+            (SELECT COUNT(*) FROM users) AS user_count,
+            (SELECT COUNT(*) FROM chats WHERE chat_type IN ('group', 'supergroup')) AS group_count,
+            (SELECT COUNT(*) FROM request_logs) AS request_count,
+            (SELECT COUNT(*) FROM request_logs WHERE status = 'error') AS error_count
         """
     )
-    return dict(users=users, groups=groups, requests=requests, errors=errors)
+    return {
+        "users": row["user_count"],
+        "groups": row["group_count"],
+        "requests": row["request_count"],
+        "errors": row["error_count"],
+    }
 
 
 async def set_user_blocked(telegram_id: int, blocked: bool) -> bool:
