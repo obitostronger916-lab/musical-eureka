@@ -2,22 +2,25 @@
 
 Universal Media — Telegram uchun o‘zbek, rus va ingliz tillarida ishlaydigan media va musiqa yordamchisi.
 
-## Hozirgi bosqich
+## Hozirgi imkoniyatlar
 
-Repository'ga boshlang‘ich loyiha skeleti joylandi:
-- aiogram 3 Telegram bot;
-- Uzbek / Русский / English til tanlash;
+- aiogram 3 Telegram bot va FastAPI `/health` endpoint'i;
+- O‘zbek, rus va ingliz tillarida interfeys;
 - foydalanuvchi tilini PostgreSQL'da saqlash;
-- /start, /language va /admin buyruqlari;
-- FastAPI /health endpoint'i;
-- Docker va Render konfiguratsiyasi.
+- `/start`, `/language` va `/admin` buyruqlari;
+- Apple iTunes katalogidan qo‘shiq nomi yoki ijrochi bo‘yicha qidirish;
+- natijalarda qo‘shiq, ijrochi, albom ma’lumoti va rasmiy Apple Store havolasi.
 
-Musiqa qidirish, media havolalarini tekshirish/qayta ishlash, audio orqali aniqlash, guruh moderatsiyasi va to‘liq admin paneli keyingi bosqichlarda ulanadi. Hozircha botni tayyor mahsulot deb hisoblamang.
+Musiqa qidiruvi Apple iTunes Search API'dan metadata oladi. Bot audio fayl yoki preview yuklab bermaydi; foydalanuvchini rasmiy katalog sahifasiga yo‘naltiradi. Apple Search API qoidalariga muvofiq natijalar Apple Store kontentini targ‘ib qiluvchi havolalar bilan ko‘rsatiladi.
+
+## Keyingi bosqichlar
+
+Instagram, YouTube, TikTok va Pinterest havolalarini aniqlash; audio/ovoz/video orqali musiqa tanish; guruhlar uchun moderatsiya; kengaytirilgan admin paneli. Himoyalangan yoki ruxsatsiz kontentni yuklab olish funksiyasi rejalashtirilmagan.
 
 ## Ishga tushirish
 
 1. Python 3.12 va PostgreSQL tayyorlang.
-2. Repository'ni kompyuterga yuklab oling.
+2. Repository'ni yuklab oling.
 3. Virtual muhit yarating va kutubxonalarni o‘rnating:
 
 ```bash
@@ -26,13 +29,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Windows'da virtual muhitni faollashtirish:
+Windows PowerShell:
 
 ```powershell
 .venv\\Scripts\\Activate.ps1
 ```
 
-4. `.env.example` faylidan `.env` nusxa yarating va qiymatlarni to‘ldiring:
+4. `.env.example` faylidan `.env` nusxa yarating va quyidagilarni to‘ldiring:
 
 - `BOT_TOKEN` — BotFather bergan bot tokeni;
 - `ADMIN_ID` — asosiy administratorning raqamli Telegram ID'si;
@@ -49,6 +52,10 @@ Tekshirish: `http://localhost:8000/health`.
 ## Render
 
 Render'da Blueprint orqali `render.yaml` ni tanlang. Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Haqiqiy tokenni GitHub'ga yoki chatga joylamang.
+
+## Tekshiruv
+
+GitHub Actions workflow Python fayllarini kompilyatsiya qiladi va `unittest` testlarini bajaradi. Workflow natijasi hali tasdiqlanmagan bo‘lsa, loyiha sinovdan to‘liq o‘tgan deb hisoblanmaydi.
 
 ## Mas'uliyatli foydalanish
 
