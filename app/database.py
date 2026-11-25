@@ -31,6 +31,9 @@ async def connect() -> None:
                 last_request_at TIMESTAMPTZ
             );
 
+            ALTER TABLE users
+                ADD COLUMN IF NOT EXISTS last_request_at TIMESTAMPTZ;
+
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id BIGINT PRIMARY KEY,
                 chat_type TEXT NOT NULL,
