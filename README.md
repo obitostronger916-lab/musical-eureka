@@ -67,7 +67,7 @@ Bot guruhdagi oddiy xabarlar va havolalarni ko‘rishi uchun BotFather’da `/se
 
 ## Render
 
-Render'da Blueprint orqali `render.yaml` ni tanlang. Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
+Render'da Blueprint orqali `render.yaml` ni tanlang. Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni; matn bo‘yicha qidirish kerak bo‘lsa, `MUSIXMATCH_API_KEY` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
 
 Render service uchun bitta instance ishlating. `/health` endpoint'i PostgreSQL va Telegram polling holatini tekshiradi.
 
