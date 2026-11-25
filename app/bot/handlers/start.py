@@ -27,8 +27,17 @@ async def start_handler(message: Message) -> None:
 
 @router.message(Command("language"))
 async def language_command(message: Message) -> None:
-    await message.answer("Tilni tanlang / Выберите язык / Choose a language:",
-                         reply_markup=language_keyboard())
+    if message.from_user is None:
+        return
+    await save_user(
+        telegram_id=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name or "",
+    )
+    await message.answer(
+        "Tilni tanlang / Выберите язык / Choose a language:",
+        reply_markup=language_keyboard(),
+    )
 
 
 @router.callback_query(F.data == "language:menu")
@@ -48,6 +57,11 @@ async def language_selected(callback: CallbackQuery) -> None:
     if language not in {"uz", "ru", "en"}:
         await callback.answer("Unsupported language", show_alert=True)
         return
+    await save_user(
+        telegram_id=callback.from_user.id,
+        username=callback.from_user.username,
+        first_name=callback.from_user.first_name or "",
+    )
     await set_user_language(callback.from_user.id, language)
     await callback.message.answer(
         f"{get_text(language, 'language_saved')}\n"
