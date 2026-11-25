@@ -86,7 +86,9 @@ async def music_command(message: Message, state: FSMContext) -> None:
         return
     await state.set_state(MusicSearch.waiting_for_query)
     await state.update_data(search_mode="title")
-    await message.answer(get_text(language, "music_help") + "\n/lyrics — qo‘shiq matnidan qidirish")
+    await message.answer(
+        get_text(language, "music_help") + "\n" + get_text(language, "lyrics_command_hint")
+    )
 
 
 @router.message(Command("lyrics"))
@@ -96,6 +98,7 @@ async def lyrics_command(message: Message, state: FSMContext) -> None:
         await message.answer(get_text(language, "blocked"))
         return
     if not get_settings().musixmatch_api_key:
+        await state.clear()
         await message.answer(get_text(language, "lyrics_unavailable"))
         return
     await state.set_state(MusicSearch.waiting_for_query)
@@ -161,7 +164,11 @@ async def section_handler(callback: CallbackQuery, state: FSMContext) -> None:
     if section == "music":
         await state.set_state(MusicSearch.waiting_for_query)
         await state.update_data(search_mode="title")
-        response = get_text(language, "music_help") + "\n/lyrics — search by lyric excerpt"
+        response = (
+            get_text(language, "music_help")
+            + "\n"
+            + get_text(language, "lyrics_command_hint")
+        )
     elif section == "media":
         await state.clear()
         response = get_text(language, "media_help")
