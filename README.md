@@ -58,6 +58,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 Tekshirish: `http://localhost:8000/health`.
 
+## Telegram guruh sozlamasi
+
+Bot guruhdagi oddiy xabarlar va havolalarni ko‘rishi uchun BotFather’da `/setprivacy` buyrug‘ini ochib, bot uchun Privacy Mode’ni `Disable` qiling. So‘ng botni guruhga qayta qo‘shing. Keraksiz administrator huquqlarini bermang. Privacy Mode yoqilgan bo‘lsa, Telegram oddiy guruh xabarlarini botga yubormasligi mumkin.
+
 ## Render
 
 Render'da Blueprint orqali `render.yaml` ni tanlang. Web service va PostgreSQL yaratilgach, Environment bo‘limida `BOT_TOKEN` va `ADMIN_ID` ni kiriting. Audio tanish kerak bo‘lsa, `AUDD_API_TOKEN` ni ham kiriting. Haqiqiy tokenlarni GitHub'ga yoki chatga joylamang.
