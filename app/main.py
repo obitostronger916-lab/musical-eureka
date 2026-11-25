@@ -67,9 +67,8 @@ async def health():
         raise HTTPException(status_code=503, detail="Database unavailable") from exc
 
     polling_task = getattr(app.state, "polling_task", None)
-    if polling_task is not None and polling_task.done():
-        if not polling_task.cancelled() and polling_task.exception() is not None:
-            raise HTTPException(status_code=503, detail="Telegram polling stopped")
+    if polling_task is None or polling_task.done():
+        raise HTTPException(status_code=503, detail="Telegram polling is not running")
     return {"status": "ok", "service": "Universal Media"}
 
 
