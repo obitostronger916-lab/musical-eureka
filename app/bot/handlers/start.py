@@ -365,7 +365,12 @@ async def media_link_handler(message: Message, state: FSMContext) -> None:
 
 
 def _is_admin(message: Message) -> bool:
-    return bool(message.from_user and message.from_user.id == get_settings().admin_id)
+    # Admin reports contain user identifiers; never expose them in group chats.
+    return bool(
+        message.chat.type == "private"
+        and message.from_user
+        and message.from_user.id == get_settings().admin_id
+    )
 
 
 @router.message(Command("admin"))
@@ -399,6 +404,9 @@ async def block_handler(message: Message) -> None:
     telegram_id = int(parts[1])
     if not 0 < telegram_id <= 9_223_372_036_854_775_807:
         await message.answer("Telegram ID noto‘g‘ri.")
+        return
+    if telegram_id == get_settings().admin_id:
+        await message.answer("Asosiy administrator o‘zini bloklay olmaydi.")
         return
     changed = await set_user_blocked(telegram_id, True)
     await message.answer("Foydalanuvchi bloklandi." if changed else "Foydalanuvchi topilmadi.")
