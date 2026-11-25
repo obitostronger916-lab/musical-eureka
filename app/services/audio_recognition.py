@@ -41,6 +41,7 @@ async def _extract_video_audio(data: bytes) -> bytes:
         "ffmpeg",
         "-hide_banner",
         "-loglevel", "error",
+        "-protocol_whitelist", "pipe",
         "-i", "pipe:0",
         "-t", "30",
         "-vn",
