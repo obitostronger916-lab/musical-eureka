@@ -28,7 +28,7 @@ TEXTS = {
         "blocked": "Botdan foydalanish imkoniyati cheklangan. Administratorga murojaat qiling.",
         "admin_only": "Bu buyruq faqat administrator uchun.",
         "unknown": "Bu bo‘lim hali ishlab chiqilmoqda.",
-        "help": "Buyruqlar: /start — boshlash, /language — til, /music — musiqa qidirish, /help — yordam.",
+        "help": "Buyruqlar: /start — boshlash, /language — til, /music — nom/ijrochi bo‘yicha qidirish, /lyrics — matndan qidirish, /help — yordam.",
     },
     "ru": {
         "welcome": "Здравствуйте! Добро пожаловать в Universal Media.",
@@ -59,7 +59,7 @@ TEXTS = {
         "blocked": "Доступ к боту ограничен. Свяжитесь с администратором.",
         "admin_only": "Эта команда доступна только администратору.",
         "unknown": "Этот раздел пока находится в разработке.",
-        "help": "Команды: /start — начать, /language — язык, /music — поиск музыки, /help — помощь.",
+        "help": "Команды: /start — начать, /language — язык, /music — поиск по названию/исполнителю, /lyrics — поиск по тексту, /help — помощь.",
     },
     "en": {
         "welcome": "Hello! Welcome to Universal Media.",
@@ -90,7 +90,7 @@ TEXTS = {
         "blocked": "Your bot access is restricted. Please contact the administrator.",
         "admin_only": "This command is for the administrator only.",
         "unknown": "This section is still under development.",
-        "help": "Commands: /start — start, /language — language, /music — search music, /help — help.",
+        "help": "Commands: /start — start, /language — language, /music — title/artist search, /lyrics — search by lyric excerpt, /help — help.",
     },
 }
 
