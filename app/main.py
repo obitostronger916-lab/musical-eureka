@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from contextlib import asynccontextmanager, suppress
+from contextlib import asynccontextmanager
 
 from aiogram import Bot, Dispatcher
 from fastapi import FastAPI, HTTPException
@@ -17,33 +17,41 @@ logger = logging.getLogger("universal_media")
 async def lifespan(app: FastAPI):
     settings = get_settings()
     logging.basicConfig(level=settings.log_level.upper())
-
     await connect()
-    bot = Bot(token=settings.bot_token)
-    dispatcher = Dispatcher()
-    dispatcher.include_router(router)
 
-    # This service uses long polling; remove any stale webhook configuration.
-    await bot.delete_webhook(drop_pending_updates=False)
-    polling_task = asyncio.create_task(
-        dispatcher.start_polling(
-            bot,
-            handle_signals=False,
-            allowed_updates=dispatcher.resolve_used_update_types(),
-        ),
-        name="telegram-polling",
-    )
-    app.state.bot = bot
-    app.state.polling_task = polling_task
-    logger.info("Universal Media started")
-
+    bot: Bot | None = None
+    polling_task: asyncio.Task | None = None
     try:
+        bot = Bot(token=settings.bot_token)
+        dispatcher = Dispatcher()
+        dispatcher.include_router(router)
+
+        # This service uses long polling; remove any stale webhook configuration.
+        await bot.delete_webhook(drop_pending_updates=False)
+        polling_task = asyncio.create_task(
+            dispatcher.start_polling(
+                bot,
+                handle_signals=False,
+                allowed_updates=dispatcher.resolve_used_update_types(),
+            ),
+            name="telegram-polling",
+        )
+        app.state.bot = bot
+        app.state.polling_task = polling_task
+        logger.info("Universal Media started")
         yield
     finally:
-        polling_task.cancel()
-        with suppress(asyncio.CancelledError):
-            await polling_task
-        await bot.session.close()
+        if polling_task is not None:
+            if not polling_task.done():
+                polling_task.cancel()
+            try:
+                await polling_task
+            except asyncio.CancelledError:
+                pass
+            except Exception:
+                logger.exception("Telegram polling task stopped with an error")
+        if bot is not None:
+            await bot.session.close()
         await close()
         logger.info("Universal Media stopped")
 
