@@ -13,9 +13,11 @@ async def connect() -> None:
     pool = await asyncpg.create_pool(
         dsn=settings.database_url,
         ssl="require",
+        server_settings={"channel_binding": "disable"},
         min_size=1,
-        max_size=10,
+        max_size=5,
         command_timeout=30,
+        timeout=30,
     )
     try:
         async with pool.acquire() as connection:
